@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var drawContainerView: UIView!
     var panGesture: UIPanGestureRecognizer!
     var collapsed: CGFloat = 0
-    var open: CGFloat = 0
+    var open: CGFloat = 60
     var partialReveal: CGFloat = 0
     
     
@@ -27,7 +27,7 @@ class ViewController: UIViewController {
     }
     
     func  setDrawContainerViewHeight() {
-        self.collapsed = 3 * self.view.bounds.size.height / 4
+        self.collapsed = 4 * self.view.bounds.size.height / 5
         self.partialReveal = self.view.bounds.size.height / 2
     }
     
@@ -39,18 +39,34 @@ class ViewController: UIViewController {
         
         switch sender.state {
         case .began:
-            print("began")
+            break
         case .changed:
-            self.drawContainerView.frame = CGRect(x: 0, y: y+translation.y, width: self.view.bounds.size.width, height: self.view.bounds.size.height)
+            print(translation.y)
+            self.drawContainerView.frame = CGRect(x: 0,
+                                                  y: y+translation.y,
+                                                  width: self.view.bounds.size.width,
+                                                  height: self.drawContainerView.frame.origin.y < self.open ? self.view.bounds.size.height : self.view.bounds.size.height - translation.y)
             sender.setTranslation(CGPoint.zero, in: self.drawContainerView)
         case .ended:
-            if self.drawContainerView.frame.origin.y > self.partialReveal && self.drawContainerView.frame.origin.y < self.collapsed {
-                self.drawContainerView.frame.origin.y = self.partialReveal
-            } else {
-                if isDown {
+            if self.drawContainerView.frame.size.height > self.view.bounds.size.height {
+                self.drawContainerView.frame.size.height = self.view.bounds.size.height
+            }
+            
+            if isDown {
+                if self.drawContainerView.frame.origin.y >= self.open && self.drawContainerView.frame.origin.y < self.partialReveal {
+                    self.drawContainerView.frame.origin.y = self.partialReveal
+                } else if self.drawContainerView.frame.origin.y >= self.partialReveal && self.drawContainerView.frame.origin.y < self.collapsed {
                     self.drawContainerView.frame.origin.y = self.collapsed
-                } else {
+                } else if self.drawContainerView.frame.origin.y >= self.collapsed {
+                    self.drawContainerView.frame.origin.y = self.collapsed
+                }
+            } else {
+                if self.drawContainerView.frame.origin.y < self.partialReveal {
                     self.drawContainerView.frame.origin.y = self.open
+                } else if self.drawContainerView.frame.origin.y >= self.partialReveal && self.drawContainerView.frame.origin.y < self.collapsed {
+                    self.drawContainerView.frame.origin.y = self.partialReveal
+                } else if self.drawContainerView.frame.origin.y >= self.collapsed {
+                    self.drawContainerView.frame.origin.y = self.collapsed
                 }
             }
         default:
